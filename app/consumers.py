@@ -7,25 +7,6 @@ from huggingface_hub import snapshot_download
 model = vosk.Model(model_name="vosk-model-en-us-0.42-gigaspeech")
 recognizer = vosk.KaldiRecognizer(model, 16000)
 
-user = getpass.getuser()
-CHECKPOINTS_PATH = pathlib.Path(os.getenv("CHECKPOINTS_PATH", f"/home/{user}/app/models"))
-if not CHECKPOINTS_PATH.exists():
-    snapshot_download(repo_id="facebook/seamless-m4t-v2-large", repo_type="model", local_dir=CHECKPOINTS_PATH)
-asset_store.env_resolvers.clear()
-asset_store.env_resolvers.append(lambda: "demo")
-demo_metadata = [
-    {
-        "name": "seamlessM4T_v2_large@demo",
-        "checkpoint": f"file://{CHECKPOINTS_PATH}/seamlessM4T_v2_large.pt",
-        "char_tokenizer": f"file://{CHECKPOINTS_PATH}/spm_char_lang38_tc.model",
-    },
-    {
-        "name": "vocoder_v2@demo",
-        "checkpoint": f"file://{CHECKPOINTS_PATH}/vocoder_v2.pt",
-    },
-]
-asset_store.metadata_providers.append(InProcAssetMetadataProvider(demo_metadata))
-
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
     dtype = torch.float16
